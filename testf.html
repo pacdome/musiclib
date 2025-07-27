@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domes Music Library</title>
+    <style>
+        body {
+            font-family: Times, serif;
+            font-size: 12px;
+            background: white;
+            color: black;
+            margin: 8px;
+            line-height: 1.2;
+        }
+
+```
+    h1 {
+        font-size: 18px;
+        margin: 0 0 8px 0;
+        text-align: center;
+    }
+
+    h2 {
+        font-size: 14px;
+        margin: 12px 0 6px 0;
+    }
+
+    h3 {
+        font-size: 12px;
+        margin: 8px 0 4px 0;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        border: 1px solid black;
+    }
+
+    th, td {
+        border: 1px solid black;
+        padding: 4px;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    th {
+        background: #cccccc;
+        font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+        background: #f0f0f0;
+    }
+
+    .header {
+        text-align: center;
+        border: 2px solid black;
+        padding: 8px;
+        margin-bottom: 16px;
+        background: #eeeeee;
+    }
+
+    .nav {
+        text-align: center;
+        margin: 8px 0;
+    }
+
+    .nav a {
+        color: blue;
+        text-decoration: underline;
+        margin: 0 8px;
+    }
+
+    .nav a:visited {
+        color: purple;
+    }
+
+    input, select, textarea {
+        font-family: Times, serif;
+        font-size: 12px;
+        border: 1px solid black;
+        padding: 2px;
+    }
+
+    input[type="submit"], button {
+        background: #dddddd;
+        border: 2px outset #dddddd;
+        padding: 4px 8px;
+        cursor: pointer;
+        font-family: Times, serif;
+        font-size: 12px;
+    }
+
+    input[type="submit"]:active, button:active {
+        border: 2px inset #dddddd;
+    }
+
+    .album-row {
+        border-bottom: 1px solid black;
+        padding: 8px 0;
+        margin: 8px 0;
+    }
+
+    .album-cover {
+        width: 80px;
+        height: 80px;
+        border: 1px solid black;
+        float: left;
+        margin-right: 12px;
+        background: #f8f8f8;
+        text-align: center;
+        line-height: 80px;
+        font-size: 10px;
+    }
+
+    .album-info {
+        margin-left: 92px;
+    }
+
+    .rating {
+        font-weight: bold;
+        background: yellow;
+        padding: 2px 4px;
+    }
+
+    .admin-panel {
+        display: none;
+        border: 2px solid black;
+        padding: 12px;
+        margin: 16px 0;
+        background: #f8f8f8;
+    }
+
+    .form-table {
+        width: 100%;
+    }
+
+    .form-table td {
+        padding: 4px;
+        border: none;
+    }
+
+    .form-table input, .form-table select, .form-table textarea {
+        width: 100%;
+    }
+
+    .track-list {
+        margin: 8px 0;
+    }
+
+    .track-item {
+        margin: 4px 0;
+        padding: 4px;
+        border: 1px solid #ccc;
+        background: white;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 16px;
+        border: 2px solid black;
+        width: 90%;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .close {
+        color: black;
+        float: right;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        background: #dddddd;
+        border: 1px solid black;
+        padding: 2px 6px;
+    }
+
+    .filter-section {
+        border: 1px solid black;
+        padding: 8px;
+        margin: 8px 0;
+        background: #f0f0f0;
+    }
+
+    .blink {
+        animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0; }
+    }
+
+    center {
+        text-align: center;
+    }
+
+    hr {
+        border: none;
+        border-top: 1px solid black;
+        margin: 8px 0;
+    }
+
+    marquee {
+        background: yellow;
+        border: 1px solid black;
+        padding: 4px;
+        margin: 8px 0;
+    }
+
+    .counter {
+        font-family: "Courier New", monospace;
+        background: black;
+        color: lime;
+        padding: 2px 4px;
+        border: 1px solid black;
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="header">
+        <h1>🎵 DOMES MUSIC LIBRARY 🎵</h1>
+        <p><b>Bewertete Alben:</b> <span class="counter" id="albumCount">000</span></p>
+        <p><a href="#" onclick="toggleLogin()">*** ADMIN LOGIN ***</a></p>
+    </div>
+
+```
+<marquee>★ Willkommen in meiner persönlichen Musiksammlung! Hier findest du alle Alben die ich je bewertet habe! ★</marquee>
+
+<!-- Admin Panel -->
+<div id="adminPanel" class="admin-panel">
+    <h2>═══ ADMIN BEREICH ═══</h2>
+    
+    <h3>MusicBrainz Suche:</h3>
+    <table class="form-table">
+        <tr>
+            <td>Suche:</td>
+            <td><input type="text" id="searchQuery" placeholder="Album oder Künstler..."></td>
+            <td><button onclick="searchMusicBrainz()">Suchen</button></td>
+        </tr>
+    </table>
+    <div id="searchResults" style="display: none; border: 1px solid black; background: white; max-height: 120px; overflow-y: auto;"></div>
+
+    <hr>
+
+    <form onsubmit="addAlbum(event)">
+        <table class="form-table">
+            <tr>
+                <td width="80"><b>Album:</b></td>
+                <td><input type="text" id="albumTitle" required></td>
+                <td width="80"><b>Künstler:</b></td>
+                <td><input type="text" id="albumArtist" required></td>
+            </tr>
+            <tr>
+                <td><b>Jahr:</b></td>
+                <td><input type="number" id="albumYear" min="1900" max="2025"></td>
+                <td><b>Genre:</b></td>
+                <td><input type="text" id="albumGenre"></td>
+            </tr>
+            <tr>
+                <td><b>Cover URL:</b></td>
+                <td colspan="3"><input type="url" id="albumCover"></td>
+            </tr>
+            <tr>
+                <td><b>Review:</b></td>
+                <td colspan="3"><textarea id="albumReview" rows="3" required></textarea></td>
+            </tr>
+        </table>
+
+        <div id="tracksContainer">
+            <h3>Songs:</h3>
+            <button type="button" onclick="addTrackField()">+ Song hinzufügen</button>
+        </div>
+
+        <p><input type="submit" value="★ ALBUM SPEICHERN ★"></p>
+    </form>
+</div>
+
+<!-- Filters -->
+<div class="filter-section">
+    <h3>═══ FILTER & SUCHE ═══</h3>
+    <table width="100%">
+        <tr>
+            <td>Suche:</td>
+            <td><input type="text" id="searchFilter" placeholder="Suchen..." onkeyup="applyFilters()"></td>
+            <td>Sortierung:</td>
+            <td>
+                <select id="sortFilter" onchange="applyFilters()">
+                    <option value="newest">Neueste zuerst</option>
+                    <option value="oldest">Älteste zuerst</option>
+                    <option value="rating-high">Beste Bewertung</option>
+                    <option value="rating-low">Schlechteste Bewertung</option>
+                    <option value="artist">Künstler A-Z</option>
+                    <option value="title">Titel A-Z</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Genre:</td>
+            <td><select id="genreFilter" onchange="applyFilters()"><option value="">Alle</option></select></td>
+            <td>Jahr:</td>
+            <td><select id="yearFilter" onchange="applyFilters()"><option value="">Alle</option></select></td>
+        </tr>
+    </table>
+</div>
+
+<hr>
+
+<!-- Albums List -->
+<div id="albumsList">
+    <center>
+        <h2>Noch keine Alben vorhanden!</h2>
+        <p>Logge dich als Admin ein, um Alben hinzuzufügen.</p>
+    </center>
+</div>
+
+<!-- Album Detail Modal -->
+<div id="albumModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">✖</span>
+        <div id="modalContent"></div>
+    </div>
+</div>
+
+<hr>
+<center>
+    <p><small>© 2025 Domes Music Library | <span class="blink">★ Powered by 90s Web Design ★</span></small></p>
+</center>
+
+<script>
+    // Data storage
+    let albums = JSON.parse(localStorage.getItem('musicLibrary') || '[]');
+    let isLoggedIn = false;
+    let trackCounter = 0;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        updateAlbumCount();
+        displayAlbums();
+        updateFilters();
+    });
+
+    // Authentication
+    function toggleLogin() {
+        if (isLoggedIn) {
+            logout();
+        } else {
+            const password = prompt('ADMIN PASSWORT:');
+            if (password === 'admin123') {
+                login();
+            } else if (password !== null && password !== '') {
+                alert('FALSCHES PASSWORT!');
+            }
+        }
+    }
+
+    function login() {
+        isLoggedIn = true;
+        document.querySelector('a[onclick="toggleLogin()"]').textContent = '*** ADMIN LOGOUT ***';
+        document.getElementById('adminPanel').style.display = 'block';
+    }
+
+    function logout() {
+        isLoggedIn = false;
+        document.querySelector('a[onclick="toggleLogin()"]').textContent = '*** ADMIN LOGIN ***';
+        document.getElementById('adminPanel').style.display = 'none';
+    }
+
+    // MusicBrainz API Search
+    async function searchMusicBrainz() {
+        const query = document.getElementById('searchQuery').value;
+        if (!query) return;
+
+        try {
+            const response = await fetch(`https://musicbrainz.org/ws/2/release/?query=${encodeURIComponent(query)}&limit=8&fmt=json`);
+            const data = await response.json();
+            
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = '';
+            resultsDiv.style.display = 'block';
+
+            data.releases.forEach(release => {
+                const div = document.createElement('div');
+                div.style.padding = '4px';
+                div.style.borderBottom = '1px solid #ccc';
+                div.style.cursor = 'pointer';
+                div.innerHTML = `<b>${release.title}</b> - ${release['artist-credit'] ? release['artist-credit'][0].name : 'unbekannt'} ${release.date ? `(${release.date.substring(0, 4)})` : ''}`;
+                div.onclick = () => selectAlbum(release);
+                resultsDiv.appendChild(div);
+            });
+        } catch (error) {
+            console.error('MusicBrainz Fehler:', error);
+            alert('Fehler bei der Suche!');
+        }
+    }
+
+    async function selectAlbum(release) {
+        document.getElementById('albumTitle').value = release.title;
+        document.getElementById('albumArtist').value = release['artist-credit'] ? release['artist-credit'][0].name : '';
+        document.getElementById('albumYear').value = release.date ? release.date.substring(0, 4) : '';
+        
+        document.getElementById('searchResults').style.display = 'none';
+
+        // Try to get tracks
+        try {
+            const response = await fetch(`https://musicbrainz.org/ws/2/release/${release.id}?inc=recordings&fmt=json`);
+            const data = await response.json();
+            
+            // Clear existing tracks
+            const container = document.getElementById('tracksContainer');
+            const existingTracks = container.querySelectorAll('.track-field');
+            existingTracks.forEach(track => track.remove());
+            
+            // Add tracks
+            if (data.media && data.media[0] && data.media[0].tracks) {
+                data.media[0].tracks.forEach(track => {
+                    addTrackField(track.title);
+                });
+            }
+        } catch (error) {
+            console.error('Track-Fehler:', error);
+        }
+    }
+
+    // Track management
+    function addTrackField(title = '') {
+        const container = document.getElementById('tracksContainer');
+        const trackDiv = document.createElement('div');
+        trackDiv.className = 'track-field track-item';
+        trackDiv.innerHTML = `
+            <table width="100%">
+                <tr>
+                    <td width="200">Song:</td>
+                    <td><input type="text" class="track-title" value="${title}" required></td>
+                    <td width="80">Rating:</td>
+                    <td width="60"><input type="number" class="track-rating" min="0" max="10" step="0.5" required></td>
+                    <td width="60"><button type="button" onclick="this.closest('.track-field').remove()">DEL</button></td>
+                </tr>
+                <tr>
+                    <td>Kommentar:</td>
+                    <td colspan="4"><input type="text" class="track-comment"></td>
+                </tr>
+            </table>
+        `;
+        container.appendChild(trackDiv);
+    }
+
+    // Album management
+    function addAlbum(event) {
+        event.preventDefault();
+        
+        const tracks = [];
+        const trackFields = document.querySelectorAll('.track-field');
+        
+        trackFields.forEach(field => {
+            const title = field.querySelector('.track-title').value;
+            const rating = parseFloat(field.querySelector('.track-rating').value);
+            const comment = field.querySelector('.track-comment').value;
+            
+            tracks.push({ title, rating, comment });
+        });
+
+        const album = {
+            id: Date.now(),
+            title: document.getElementById('albumTitle').value,
+            artist: document.getElementById('albumArtist').value,
+            year: parseInt(document.getElementById('albumYear').value) || null,
+            genre: document.getElementById('albumGenre').value,
+            cover: document.getElementById('albumCover').value,
+            review: document.getElementById('albumReview').value,
+            tracks: tracks,
+            rating: tracks.length > 0 ? tracks.reduce((sum, track) => sum + track.rating, 0) / tracks.length : 0,
+            dateAdded: new Date().toISOString()
+        };
+
+        albums.push(album);
+        localStorage.setItem('musicLibrary', JSON.stringify(albums));
+        
+        // Clear form
+        document.querySelector('form').reset();
+        document.querySelectorAll('.track-field').forEach(field => field.remove());
+        
+        updateAlbumCount();
+        displayAlbums();
+        updateFilters();
+        
+        alert('★ ALBUM GESPEICHERT! ★');
+    }
+
+    // Display functions
+    function updateAlbumCount() {
+        document.getElementById('albumCount').textContent = albums.length.toString().padStart(3, '0');
+    }
+
+    function displayAlbums() {
+        const container = document.getElementById('albumsList');
+        
+        if (albums.length === 0) {
+            container.innerHTML = `
+                <center>
+                    <h2>Noch keine Alben vorhanden!</h2>
+                    <p>Logge dich als Admin ein, um Alben hinzuzufügen.</p>
+                </center>
+            `;
+            return;
+        }
+
+        let filteredAlbums = [...albums];
+        
+        // Apply filters
+        const searchTerm = document.getElementById('searchFilter').value.toLowerCase();
+        const genreFilter = document.getElementById('genreFilter').value;
+        const yearFilter = document.getElementById('yearFilter').value;
+        const sortFilter = document.getElementById('sortFilter').value;
+
+        if (searchTerm) {
+            filteredAlbums = filteredAlbums.filter(album => 
+                album.title.toLowerCase().includes(searchTerm) || 
+                album.artist.toLowerCase().includes(searchTerm)
+            );
+        }
+
+        if (genreFilter) {
+            filteredAlbums = filteredAlbums.filter(album => album.genre === genreFilter);
+        }
+
+        if (yearFilter) {
+            filteredAlbums = filteredAlbums.filter(album => album.year == yearFilter);
+        }
+
+        // Sort albums
+        filteredAlbums.sort((a, b) => {
+            switch (sortFilter) {
+                case 'oldest':
+                    return new Date(a.dateAdded) - new Date(b.dateAdded);
+                case 'rating-high':
+                    return b.rating - a.rating;
+                case 'rating-low':
+                    return a.rating - b.rating;
+                case 'artist':
+                    return a.artist.localeCompare(b.artist);
+                case 'title':
+                    return a.title.localeCompare(b.title);
+                default: // newest
+                    return new Date(b.dateAdded) - new Date(a.dateAdded);
+            }
+        });
+
+        container.innerHTML = filteredAlbums.map(album => `
+            <div class="album-row" onclick="openAlbumDetail(${album.id})" style="cursor: pointer;">
+                <div class="album-cover" style="${album.cover ? `background-image: url('${album.cover}'); background-size: cover; background-position: center;` : ''}">
+                    ${!album.cover ? 'NO<br>PIC' : ''}
+                </div>
+                <div class="album-info">
+                    <h3><u>${album.title}</u> - ${album.artist} <span class="rating">${album.rating.toFixed(1)}/10</span></h3>
+                    <p><b>Review:</b> ${album.review}</p>
+                    <p><small>
+                        ${album.year ? `Jahr: ${album.year} | ` : ''}
+                        ${album.genre ? `Genre: ${album.genre} | ` : ''}
+                        Songs: ${album.tracks.length}
+                    </small></p>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+        `).join('');
+    }
+
+    function applyFilters() {
+        displayAlbums();
+    }
+
+    function updateFilters() {
+        // Update genre filter
+        const genres = [...new Set(albums.map(album => album.genre).filter(Boolean))].sort();
+        const genreSelect = document.getElementById('genreFilter');
+        genreSelect.innerHTML = '<option value="">Alle</option>' + 
+            genres.map(genre => `<option value="${genre}">${genre}</option>`).join('');
+
+        // Update year filter
+        const years = [...new Set(albums.map(album => album.year).filter(Boolean))].sort((a, b) => b - a);
+        const yearSelect = document.getElementById('yearFilter');
+        yearSelect.innerHTML = '<option value="">Alle</option>' + 
+            years.map(year => `<option value="${year}">${year}</option>`).join('');
+    }
+
+    // Modal functions
+    function openAlbumDetail(albumId) {
+        const album = albums.find(a => a.id === albumId);
+        if (!album) return;
+
+        const modalContent = document.getElementById('modalContent');
+        modalContent.innerHTML = `
+            <center><h2>═══ ${album.title} ═══</h2></center>
+            
+            <table width="100%">
+                <tr>
+                    <td width="100" rowspan="6">
+                        <div style="width: 100px; height: 100px; border: 1px solid black; ${album.cover ? `background-image: url('${album.cover}'); background-size: cover; background-position: center;` : 'background: #f8f8f8; text-align: center; line-height: 100px; font-size: 10px;'}">
+                            ${!album.cover ? 'NO PIC' : ''}
+                        </div>
+                    </td>
+                    <td><b>Künstler:</b></td>
+                    <td>${album.artist}</td>
+                </tr>
+                <tr>
+                    <td><b>Bewertung:</b></td>
+                    <td><span class="rating">${album.rating.toFixed(1)}/10</span></td>
+                </tr>
+                ${album.year ? `<tr><td><b>Jahr:</b></td><td>${album.year}</td></tr>` : ''}
+                ${album.genre ? `<tr><td><b>Genre:</b></td><td>${album.genre}</td></tr>` : ''}
+                <tr>
+                    <td><b>Fazit:</b></td>
+                    <td>${album.review}</td>
+                </tr>
+            </table>
+            
+            <hr>
+            
+            <h3>═══ SONGS (${album.tracks.length}) ═══</h3>
+            <table width="100%">
+                <tr>
+                    <th>Nr.</th>
+                    <th>Titel</th>
+                    <th>Rating</th>
+                    <th>Kommentar</th>
+                </tr>
+                ${album.tracks.map((track, index) => `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><b>${track.title}</b></td>
+                        <td><span class="rating">${track.rating}/10</span></td>
+                        <td>${track.comment || '-'}</td>
+                    </tr>
+                `).join('')}
+            </table>
+        `;
+
+        document.getElementById('albumModal').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('albumModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('albumModal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
+</script>
+```
+
+</body>
+</html>
