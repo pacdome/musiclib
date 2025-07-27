@@ -106,52 +106,8 @@
             margin: 8px 0;
         }
 
-        .album-cover {
-            width: 80px;
-            height: 80px;
-            border: 2px solid black;
-            float: left;
-            margin-right: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            text-align: center;
-            line-height: 80px;
-            font-size: 11px;
-            font-weight: bold;
-            color: white;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .album-cover::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: repeating-linear-gradient(
-                45deg,
-                rgba(255,255,255,0.1) 0px,
-                rgba(255,255,255,0.1) 1px,
-                transparent 1px,
-                transparent 8px
-            );
-        }
-
-        /* Different gradient styles based on genre */
-        .album-cover.rock { background: linear-gradient(135deg, #ff4757 0%, #ff3838 100%); }
-        .album-cover.pop { background: linear-gradient(135deg, #ff9ff3 0%, #f368e0 100%); }
-        .album-cover.jazz { background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%); }
-        .album-cover.electronic { background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%); }
-        .album-cover.classical { background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%); }
-        .album-cover.hip-hop { background: linear-gradient(135deg, #2c3e50 0%, #000000 100%); }
-        .album-cover.country { background: linear-gradient(135deg, #8b4513 0%, #daa520 100%); }
-        .album-cover.blues { background: linear-gradient(135deg, #4169e1 0%, #191970 100%); }
-        .album-cover.metal { background: linear-gradient(135deg, #434343 0%, #000000 100%); }
-
         .album-info {
-            margin-left: 92px;
+            margin: 0;
         }
 
         .rating {
@@ -324,9 +280,7 @@
 
     <marquee>★ Willkommen in meiner persönlichen Musiksammlung! Öffentlich zugänglich über GitHub Pages! ★</marquee>
 
-    <div class="public-notice">
-        <p><b>📖 Öffentlicher Modus:</b> Alle können die Alben einsehen | Admin-Login erforderlich zum Bearbeiten</p>
-    </div>
+
 
     <!-- Admin Panel -->
     <div id="adminPanel" class="admin-panel">
@@ -500,6 +454,11 @@
         let albums = [];
         let isLoggedIn = false;
         let trackCounter = 0;
+        let loginAttempts = 0;
+        let lockoutEndTime = 0;
+
+        // Password hash (SHA-256 of "admin123")
+        const ADMIN_HASH = "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9";
 
         // Demo data for fallback
         const demoAlbums = [
@@ -816,15 +775,53 @@
         }
 
         // Authentication
-        function toggleLogin() {
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hash = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function isLockedOut() {
+            return Date.now() < lockoutEndTime;
+        }
+
+        function getRemainingLockoutTime() {
+            return Math.ceil((lockoutEndTime - Date.now()) / 1000);
+        }
+
+        async function toggleLogin() {
             if (isLoggedIn) {
                 logout();
             } else {
+                if (isLockedOut()) {
+                    alert(`⛔ Zu viele fehlgeschlagene Versuche! Warte noch ${getRemainingLockoutTime()} Sekunden.`);
+                    return;
+                }
+
                 const password = prompt('ADMIN PASSWORT:');
-                if (password === 'admin123') {
+                if (password === null) return; // User cancelled
+                
+                if (password === '') {
+                    alert('Bitte ein Passwort eingeben!');
+                    return;
+                }
+
+                const hashedInput = await hashPassword(password);
+                
+                if (hashedInput === ADMIN_HASH) {
+                    loginAttempts = 0;
                     login();
-                } else if (password !== null && password !== '') {
-                    alert('FALSCHES PASSWORT!');
+                } else {
+                    loginAttempts++;
+                    const remainingAttempts = 3 - loginAttempts;
+                    
+                    if (loginAttempts >= 3) {
+                        lockoutEndTime = Date.now() + (5 * 60 * 1000); // 5 minutes lockout
+                        alert('❌ FALSCHES PASSWORT!\n\n⛔ 3 fehlgeschlagene Versuche erreicht!\nZugang gesperrt für 5 Minuten.');
+                    } else {
+                        alert(`❌ FALSCHES PASSWORT!\n\nNoch ${remainingAttempts} Versuche übrig.`);
+                    }
                 }
             }
         }
@@ -995,13 +992,7 @@
 
         // Function to generate simple album cover design
         function generateAlbumCover(album) {
-            const genre = (album.genre || 'default').toLowerCase().replace(/\s+/g, '-');
-            const genreClass = ['rock', 'pop', 'jazz', 'electronic', 'classical', 'hip-hop', 'country', 'blues', 'metal']
-                .find(g => genre.includes(g)) || 'default';
-            
-            const firstLetter = album.title.charAt(0).toUpperCase();
-            
-            return `<div class="album-cover ${genreClass}">${firstLetter}</div>`;
+            return ''; // No covers anymore
         }
         
         function updateAlbumCount() {
@@ -1064,7 +1055,6 @@
 
             container.innerHTML = filteredAlbums.map(album => `
                 <div class="album-row" onclick="openAlbumDetail(${album.id})" style="cursor: pointer;">
-                    ${generateAlbumCover(album)}
                     <div class="album-info">
                         <h3><u>${album.title}</u> - ${album.artist} <span class="rating">${album.rating.toFixed(1)}/10</span></h3>
                         <p><b>Review:</b> ${album.review}</p>
@@ -1074,7 +1064,6 @@
                             Songs: ${album.tracks.length}
                         </small></p>
                     </div>
-                    <div style="clear: both;"></div>
                 </div>
             `).join('');
         }
@@ -1108,9 +1097,6 @@
                 
                 <table width="100%">
                     <tr>
-                        <td width="100" rowspan="6">
-                            ${generateAlbumCover(album).replace('80px', '100px').replace('line-height: 80px', 'line-height: 100px').replace('font-size: 11px', 'font-size: 24px')}
-                        </td>
                         <td><b>Künstler:</b></td>
                         <td>${album.artist}</td>
                     </tr>
