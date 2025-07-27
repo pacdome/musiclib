@@ -112,15 +112,13 @@
             border: 2px solid black;
             float: left;
             margin-right: 12px;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
-            background-size: 200% 200%;
-            animation: gradientMove 3s ease infinite;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             text-align: center;
             line-height: 80px;
-            font-size: 24px;
+            font-size: 11px;
             font-weight: bold;
             color: white;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
             position: relative;
             overflow: hidden;
         }
@@ -134,17 +132,23 @@
             bottom: 0;
             background: repeating-linear-gradient(
                 45deg,
-                transparent,
-                transparent 2px,
-                rgba(255,255,255,0.1) 2px,
-                rgba(255,255,255,0.1) 4px
+                rgba(255,255,255,0.1) 0px,
+                rgba(255,255,255,0.1) 1px,
+                transparent 1px,
+                transparent 8px
             );
         }
 
-        @keyframes gradientMove {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
+        /* Different gradient styles based on genre */
+        .album-cover.rock { background: linear-gradient(135deg, #ff4757 0%, #ff3838 100%); }
+        .album-cover.pop { background: linear-gradient(135deg, #ff9ff3 0%, #f368e0 100%); }
+        .album-cover.jazz { background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%); }
+        .album-cover.electronic { background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%); }
+        .album-cover.classical { background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%); }
+        .album-cover.hip-hop { background: linear-gradient(135deg, #2c3e50 0%, #000000 100%); }
+        .album-cover.country { background: linear-gradient(135deg, #8b4513 0%, #daa520 100%); }
+        .album-cover.blues { background: linear-gradient(135deg, #4169e1 0%, #191970 100%); }
+        .album-cover.metal { background: linear-gradient(135deg, #434343 0%, #000000 100%); }
 
         .album-info {
             margin-left: 92px;
@@ -305,7 +309,6 @@
         <h1>🎵 DOMES MUSIC LIBRARY 🎵</h1>
         <p><b>Bewertete Alben:</b> <span class="counter" id="albumCount">000</span></p>
         <p>
-            <a href="#" onclick="toggleSetup()" id="setupLink">*** SETUP ***</a> | 
             <a href="#" onclick="toggleLogin()" id="loginLink">*** ADMIN LOGIN ***</a>
         </p>
         <div id="connectionStatus"></div>
@@ -313,53 +316,53 @@
 
     <marquee>★ Willkommen in meiner persönlichen Musiksammlung! Daten werden über GitHub synchronisiert! ★</marquee>
 
-    <!-- Setup Panel -->
-    <div id="setupPanel" class="setup-panel">
-        <h2>🔧 GITHUB SETUP</h2>
-        <p><b>Erstmalige Einrichtung erforderlich!</b></p>
-        
-        <div class="setup-section">
-            <h3>Schritt 1: GitHub Token erstellen</h3>
-            <ol style="font-size: 11px; margin: 8px 0;">
-                <li>Gehe zu <b>GitHub.com → Settings → Developer settings</b></li>
-                <li><b>Personal access tokens → Tokens (classic)</b></li>
-                <li>Klick <b>"Generate new token (classic)"</b></li>
-                <li>Name: <b>"Music Library"</b></li>
-                <li>Expiration: <b>"No expiration"</b></li>
-                <li>Scopes: ✅ <b>repo</b> (full control of repositories)</li>
-                <li><b>Token generieren und kopieren!</b></li>
-            </ol>
-        </div>
 
-        <div class="setup-section">
-            <h3>Schritt 2: Konfiguration</h3>
-            <table class="form-table">
-                <tr>
-                    <td width="120"><b>GitHub Username:</b></td>
-                    <td><input type="text" id="setupUsername" placeholder="dein-github-username"></td>
-                </tr>
-                <tr>
-                    <td><b>Repository Name:</b></td>
-                    <td><input type="text" id="setupRepo" placeholder="music-library"></td>
-                </tr>
-                <tr>
-                    <td><b>GitHub Token:</b></td>
-                    <td><input type="password" id="setupToken" placeholder="ghp_..."></td>
-                </tr>
-            </table>
-            
-            <p>
-                <button type="button" onclick="saveSetupConfig()">💾 Setup abschließen</button>
-                <button type="button" onclick="testSetupConnection()">🔧 Verbindung testen</button>
-            </p>
-        </div>
-        
-        <div id="setupStatus"></div>
-    </div>
 
     <!-- Admin Panel -->
     <div id="adminPanel" class="admin-panel">
         <h2>═══ ADMIN BEREICH ═══</h2>
+        
+        <!-- GitHub Setup (nur im Admin sichtbar) -->
+        <div class="setup-section">
+            <h3>🔧 GitHub Konfiguration:</h3>
+            <table class="form-table">
+                <tr>
+                    <td width="120"><b>GitHub Username:</b></td>
+                    <td><input type="text" id="githubUsername" placeholder="dein-github-username"></td>
+                </tr>
+                <tr>
+                    <td><b>Repository Name:</b></td>
+                    <td><input type="text" id="githubRepo" placeholder="music-library"></td>
+                </tr>
+                <tr>
+                    <td><b>GitHub Token:</b></td>
+                    <td><input type="password" id="githubToken" placeholder="ghp_..."></td>
+                </tr>
+            </table>
+            
+            <p>
+                <button type="button" onclick="saveGitHubConfig()">💾 Konfiguration speichern</button>
+                <button type="button" onclick="testConnection()">🔧 Verbindung testen</button>
+            </p>
+            
+            <details>
+                <summary><b>❓ Wie erstelle ich ein GitHub Token?</b></summary>
+                <div style="background: white; padding: 8px; border: 1px solid #ccc; margin: 4px 0;">
+                    <ol style="font-size: 11px; margin: 8px 0;">
+                        <li>Gehe zu <b>GitHub.com → Settings → Developer settings</b></li>
+                        <li><b>Personal access tokens → Tokens (classic)</b></li>
+                        <li>Klick <b>"Generate new token (classic)"</b></li>
+                        <li>Name: <b>"Music Library"</b></li>
+                        <li>Expiration: <b>"No expiration"</b></li>
+                        <li>Scopes: ✅ <b>repo</b> (full control of repositories)</li>
+                        <li><b>Token generieren und kopieren!</b></li>
+                    </ol>
+                </div>
+            </details>
+            
+            <div id="setupStatus"></div>
+            <hr>
+        </div>
         
         <h3>MusicBrainz Suche:</h3>
         <table class="form-table">
@@ -491,8 +494,7 @@
 
         function checkInitialState() {
             if (isConfigured()) {
-                // Configuration exists, hide setup and load albums
-                document.getElementById('setupLink').style.display = 'none';
+                // Configuration exists, load albums
                 loadAlbumsFromGitHub();
             } else {
                 // No configuration, show setup message
@@ -505,7 +507,7 @@
                 <center>
                     <div class="error">
                         <h2>GitHub Setup erforderlich!</h2>
-                        <p>Klicke auf <b>"*** SETUP ***"</b> um die GitHub-Integration einzurichten.</p>
+                        <p>Logge dich als <b>Admin</b> ein, um die GitHub-Integration einzurichten.</p>
                         <p>Du benötigst ein GitHub Repository und einen Personal Access Token.</p>
                     </div>
                 </center>
@@ -516,24 +518,11 @@
             return config.githubUsername && config.githubRepo && config.githubToken;
         }
 
-        // Setup functions
-        function toggleSetup() {
-            const panel = document.getElementById('setupPanel');
-            if (panel.style.display === 'block') {
-                panel.style.display = 'none';
-            } else {
-                panel.style.display = 'block';
-                // Load current config if exists
-                document.getElementById('setupUsername').value = config.githubUsername || '';
-                document.getElementById('setupRepo').value = config.githubRepo || '';
-                document.getElementById('setupToken').value = config.githubToken || '';
-            }
-        }
-
-        function saveSetupConfig() {
-            const username = document.getElementById('setupUsername').value.trim();
-            const repo = document.getElementById('setupRepo').value.trim();
-            const token = document.getElementById('setupToken').value.trim();
+        // GitHub config functions (now in admin panel)
+        function saveGitHubConfig() {
+            const username = document.getElementById('githubUsername').value.trim();
+            const repo = document.getElementById('githubRepo').value.trim();
+            const token = document.getElementById('githubToken').value.trim();
 
             if (!username || !repo || !token) {
                 document.getElementById('setupStatus').innerHTML = '<div class="error">❌ Bitte alle Felder ausfüllen!</div>';
@@ -554,15 +543,12 @@
             
             document.getElementById('setupStatus').innerHTML = '<div class="status">✅ Konfiguration gespeichert!</div>';
             
-            // Hide setup link and test connection
-            document.getElementById('setupLink').style.display = 'none';
-            
             setTimeout(() => {
-                testSetupConnection();
+                testConnection();
             }, 500);
         }
 
-        async function testSetupConnection() {
+        async function testConnection() {
             if (!isConfigured()) {
                 document.getElementById('setupStatus').innerHTML = '<div class="error">❌ Bitte zuerst Konfiguration speichern!</div>';
                 return;
@@ -581,9 +567,8 @@
                 if (response.ok) {
                     document.getElementById('setupStatus').innerHTML = '<div class="status">✅ GitHub-Verbindung erfolgreich! Repository gefunden.</div>';
                     
-                    // Initialize repository and hide setup panel
+                    // Initialize repository after successful connection
                     await initializeRepository();
-                    document.getElementById('setupPanel').style.display = 'none';
                 } else if (response.status === 404) {
                     document.getElementById('setupStatus').innerHTML = '<div class="error">❌ Repository nicht gefunden! Prüfe Username und Repository-Name.</div>';
                 } else if (response.status === 401) {
@@ -741,6 +726,11 @@
             isLoggedIn = true;
             document.getElementById('loginLink').textContent = '*** ADMIN LOGOUT ***';
             document.getElementById('adminPanel').style.display = 'block';
+            
+            // Load current config into setup fields
+            document.getElementById('githubUsername').value = config.githubUsername || '';
+            document.getElementById('githubRepo').value = config.githubRepo || '';
+            document.getElementById('githubToken').value = config.githubToken || '';
         }
 
         function logout() {
@@ -896,38 +886,15 @@
             }
         }
 
-        // Function to generate album cover emoji based on genre and title
-        function generateAlbumEmoji(album) {
-            const genre = (album.genre || '').toLowerCase();
-            const title = album.title.toLowerCase();
+        // Function to generate simple album cover design
+        function generateAlbumCover(album) {
+            const genre = (album.genre || 'default').toLowerCase().replace(/\s+/g, '-');
+            const genreClass = ['rock', 'pop', 'jazz', 'electronic', 'classical', 'hip-hop', 'country', 'blues', 'metal']
+                .find(g => genre.includes(g)) || 'default';
             
-            // Genre-based emojis
-            if (genre.includes('rock') || genre.includes('metal')) return '🤘';
-            if (genre.includes('pop')) return '🎤';
-            if (genre.includes('jazz')) return '🎷';
-            if (genre.includes('classical') || genre.includes('opera')) return '🎼';
-            if (genre.includes('electronic') || genre.includes('techno') || genre.includes('house')) return '🎛️';
-            if (genre.includes('hip hop') || genre.includes('rap')) return '🎤';
-            if (genre.includes('country')) return '🤠';
-            if (genre.includes('blues')) return '🎸';
-            if (genre.includes('folk') || genre.includes('indie')) return '🎻';
-            if (genre.includes('punk')) return '💀';
-            if (genre.includes('reggae')) return '🌴';
-            if (genre.includes('ambient') || genre.includes('chill')) return '☁️';
+            const firstLetter = album.title.charAt(0).toUpperCase();
             
-            // Title-based fallbacks
-            if (title.includes('love') || title.includes('heart')) return '❤️';
-            if (title.includes('dark') || title.includes('night')) return '🌙';
-            if (title.includes('sun') || title.includes('light')) return '☀️';
-            if (title.includes('fire') || title.includes('burn')) return '🔥';
-            if (title.includes('water') || title.includes('ocean') || title.includes('sea')) return '🌊';
-            if (title.includes('star') || title.includes('space')) return '⭐';
-            if (title.includes('dream')) return '💭';
-            if (title.includes('dance')) return '💃';
-            
-            // Default music emojis
-            const defaultEmojis = ['🎵', '🎶', '🎼', '🎹', '🎸', '🥁', '🎺', '🎻'];
-            return defaultEmojis[album.id % defaultEmojis.length];
+            return `<div class="album-cover ${genreClass}">${firstLetter}</div>`;
         }
         function updateAlbumCount() {
             document.getElementById('albumCount').textContent = albums.length.toString().padStart(3, '0');
@@ -989,9 +956,7 @@
 
             container.innerHTML = filteredAlbums.map(album => `
                 <div class="album-row" onclick="openAlbumDetail(${album.id})" style="cursor: pointer;">
-                    <div class="album-cover">
-                        ${generateAlbumEmoji(album)}
-                    </div>
+                    ${generateAlbumCover(album)}
                     <div class="album-info">
                         <h3><u>${album.title}</u> - ${album.artist} <span class="rating">${album.rating.toFixed(1)}/10</span></h3>
                         <p><b>Review:</b> ${album.review}</p>
@@ -1036,10 +1001,7 @@
                 <table width="100%">
                     <tr>
                         <td width="100" rowspan="6">
-                            <div style="width: 100px; height: 100px; border: 2px solid black; background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57); background-size: 200% 200%; animation: gradientMove 3s ease infinite; text-align: center; line-height: 100px; font-size: 32px; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.7); position: relative; overflow: hidden;">
-                                <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.1) 2px, rgba(255,255,255,0.1) 4px);"></div>
-                                <div style="position: relative; z-index: 1;">${generateAlbumEmoji(album)}</div>
-                            </div>
+                            ${generateAlbumCover(album).replace('80px', '100px').replace('line-height: 80px', 'line-height: 100px').replace('font-size: 11px', 'font-size: 24px')}
                         </td>
                         <td><b>Künstler:</b></td>
                         <td>${album.artist}</td>
