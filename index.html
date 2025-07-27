@@ -302,6 +302,14 @@
             padding: 4px;
             margin: 4px 0;
         }
+
+        .public-notice {
+            background: #e6f3ff;
+            border: 2px solid #0066cc;
+            padding: 8px;
+            margin: 8px 0;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -314,9 +322,11 @@
         <div id="connectionStatus"></div>
     </div>
 
-    <marquee>★ Willkommen in meiner persönlichen Musiksammlung! Daten werden über GitHub synchronisiert! ★</marquee>
+    <marquee>★ Willkommen in meiner persönlichen Musiksammlung! Öffentlich zugänglich über GitHub Pages! ★</marquee>
 
-
+    <div class="public-notice">
+        <p><b>📖 Öffentlicher Modus:</b> Alle können die Alben einsehen | Admin-Login erforderlich zum Bearbeiten</p>
+    </div>
 
     <!-- Admin Panel -->
     <div id="adminPanel" class="admin-panel">
@@ -346,8 +356,9 @@
             </p>
             
             <details>
-                <summary><b>❓ Wie erstelle ich ein GitHub Token?</b></summary>
+                <summary><b>❓ Setup-Anleitung für öffentlichen Zugang:</b></summary>
                 <div style="background: white; padding: 8px; border: 1px solid #ccc; margin: 4px 0;">
+                    <h4>1. GitHub Token erstellen:</h4>
                     <ol style="font-size: 11px; margin: 8px 0;">
                         <li>Gehe zu <b>GitHub.com → Settings → Developer settings</b></li>
                         <li><b>Personal access tokens → Tokens (classic)</b></li>
@@ -357,6 +368,23 @@
                         <li>Scopes: ✅ <b>repo</b> (full control of repositories)</li>
                         <li><b>Token generieren und kopieren!</b></li>
                     </ol>
+
+                    <h4>2. Repository für öffentlichen Zugang einrichten:</h4>
+                    <ol style="font-size: 11px; margin: 8px 0;">
+                        <li>Repository erstellen oder öffnen</li>
+                        <li><b>Settings → Pages</b></li>
+                        <li>Source: <b>"Deploy from a branch"</b></li>
+                        <li>Branch: <b>"main" / "master"</b></li>
+                        <li>Diese HTML-Datei als <b>"index.html"</b> in dein Repository hochladen</li>
+                        <li>URL wird sein: <b>https://[username].github.io/[repository-name]</b></li>
+                    </ol>
+
+                    <h4>3. Dual-Mode Funktionalität:</h4>
+                    <p style="font-size: 11px;">
+                        • <b>Öffentlich:</b> Alben werden von der öffentlichen albums.json geladen<br>
+                        • <b>Admin:</b> GitHub Token nur für Bearbeitung/Speichern erforderlich<br>
+                        • <b>Fallback:</b> Wenn GitHub nicht erreichbar, werden lokale Demo-Daten gezeigt
+                    </p>
                 </div>
             </details>
             
@@ -457,7 +485,7 @@
 
     <hr>
     <center>
-        <p><small>© 2025 Domes Music Library | <span class="blink">★ Powered by GitHub API ★</span></small></p>
+        <p><small>© 2025 Domes Music Library | <span class="blink">★ Öffentlich über GitHub Pages ★</span></small></p>
     </center>
 
     <script>
@@ -472,6 +500,43 @@
         let albums = [];
         let isLoggedIn = false;
         let trackCounter = 0;
+
+        // Demo data for fallback
+        const demoAlbums = [
+            {
+                id: 1,
+                title: "OK Computer",
+                artist: "Radiohead",
+                year: 1997,
+                genre: "Alternative Rock",
+                review: "Ein Meisterwerk des experimentellen Rocks. Thom Yorkes eindringliche Stimme und die innovativen Produktionstechniken machen dieses Album zu einem zeitlosen Klassiker.",
+                rating: 9.5,
+                dateAdded: "2025-01-15T10:00:00Z",
+                tracks: [
+                    { title: "Airbag", rating: 8.5, comment: "Kraftvoller Opener" },
+                    { title: "Paranoid Android", rating: 10, comment: "Absolute Perfektion" },
+                    { title: "Subterranean Homesick Alien", rating: 8, comment: "Atmosphärisch" },
+                    { title: "Exit Music (For a Film)", rating: 9, comment: "Emotional berührend" },
+                    { title: "Let Down", rating: 9.5, comment: "Unterschätzt" }
+                ]
+            },
+            {
+                id: 2,
+                title: "Random Access Memories",
+                artist: "Daft Punk",
+                year: 2013,
+                genre: "Electronic",
+                review: "Eine Hommage an die Disco-Ära mit modernen elektronischen Elementen. Perfekte Produktion und nostalgische Vibes.",
+                rating: 8.7,
+                dateAdded: "2025-01-14T14:30:00Z",
+                tracks: [
+                    { title: "Give Life Back to Music", rating: 8, comment: "Groovy Start" },
+                    { title: "The Game of Love", rating: 7.5, comment: "Smooth" },
+                    { title: "Giorgio by Moroder", rating: 9, comment: "Episch" },
+                    { title: "Get Lucky", rating: 9, comment: "Hit!" }
+                ]
+            }
+        ];
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -493,25 +558,74 @@
         }
 
         function checkInitialState() {
-            if (isConfigured()) {
-                // Configuration exists, load albums
-                loadAlbumsFromGitHub();
-            } else {
-                // No configuration, show setup message
-                showSetupRequired();
+            // Always try to load albums publicly first
+            loadAlbumsPublicly();
+        }
+
+        // NEW: Public loading function (no authentication required)
+        async function loadAlbumsPublicly() {
+            try {
+                // Try to determine GitHub info from current URL if on GitHub Pages
+                let username = config.githubUsername;
+                let repo = config.githubRepo;
+                
+                // Auto-detect from GitHub Pages URL
+                if (window.location.hostname.includes('github.io')) {
+                    const parts = window.location.hostname.split('.');
+                    if (parts.length >= 3 && parts[1] === 'github' && parts[2] === 'io') {
+                        username = parts[0];
+                        const pathParts = window.location.pathname.split('/').filter(p => p);
+                        if (pathParts.length > 0) {
+                            repo = pathParts[0];
+                        }
+                    }
+                }
+
+                if (username && repo) {
+                    // Try to load from public GitHub URL (raw content)
+                    const publicUrl = `https://raw.githubusercontent.com/${username}/${repo}/main/albums.json`;
+                    
+                    try {
+                        const response = await fetch(publicUrl);
+                        if (response.ok) {
+                            const data = await response.text();
+                            albums = JSON.parse(data);
+                            
+                            updateAlbumCount();
+                            displayAlbums();
+                            updateFilters();
+                            
+                            document.getElementById('connectionStatus').innerHTML = '<div class="status">✅ Alben öffentlich geladen</div>';
+                            setTimeout(() => document.getElementById('connectionStatus').innerHTML = '', 2000);
+                            return;
+                        }
+                    } catch (error) {
+                        console.log('Public loading failed, trying with auth...', error);
+                    }
+                }
+
+                // Fallback: Try with authentication if configured
+                if (isConfigured()) {
+                    await loadAlbumsFromGitHub();
+                    return;
+                }
+
+                // Last fallback: Show demo data
+                showDemoData();
+                
+            } catch (error) {
+                console.error('Public loading error:', error);
+                showDemoData();
             }
         }
 
-        function showSetupRequired() {
-            document.getElementById('albumsList').innerHTML = `
-                <center>
-                    <div class="error">
-                        <h2>GitHub Setup erforderlich!</h2>
-                        <p>Logge dich als <b>Admin</b> ein, um die GitHub-Integration einzurichten.</p>
-                        <p>Du benötigst ein GitHub Repository und einen Personal Access Token.</p>
-                    </div>
-                </center>
-            `;
+        function showDemoData() {
+            albums = [...demoAlbums];
+            updateAlbumCount();
+            displayAlbums();
+            updateFilters();
+            
+            document.getElementById('connectionStatus').innerHTML = '<div class="loading">📍 Demo-Daten | Für Live-Daten: GitHub konfigurieren</div>';
         }
 
         function isConfigured() {
@@ -626,22 +740,15 @@
                     displayAlbums();
                     updateFilters();
                     
-                    document.getElementById('connectionStatus').innerHTML = '<div class="status">✅ Alben geladen</div>';
+                    document.getElementById('connectionStatus').innerHTML = '<div class="status">✅ Alben mit Auth geladen</div>';
                     setTimeout(() => document.getElementById('connectionStatus').innerHTML = '', 2000);
                 } else {
                     throw new Error('Alben konnten nicht geladen werden');
                 }
             } catch (error) {
                 console.error('Load error:', error);
-                document.getElementById('albumsList').innerHTML = `
-                    <center>
-                        <div class="error">
-                            <h2>Fehler beim Laden der Alben!</h2>
-                            <p>${error.message}</p>
-                            <p>Überprüfe deine GitHub-Konfiguration.</p>
-                        </div>
-                    </center>
-                `;
+                // Fallback to public loading
+                loadAlbumsPublicly();
             }
         }
 
@@ -823,7 +930,7 @@
             event.preventDefault();
             
             if (!isConfigured()) {
-                alert('GitHub Setup ist erforderlich!');
+                alert('GitHub Setup ist erforderlich zum Speichern!');
                 return;
             }
             
@@ -896,6 +1003,7 @@
             
             return `<div class="album-cover ${genreClass}">${firstLetter}</div>`;
         }
+        
         function updateAlbumCount() {
             document.getElementById('albumCount').textContent = albums.length.toString().padStart(3, '0');
         }
