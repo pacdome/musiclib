@@ -104,6 +104,7 @@
             border-bottom: 1px solid black;
             padding: 8px 0;
             margin: 8px 0;
+            position: relative;
         }
 
         .album-info {
@@ -114,6 +115,28 @@
             font-weight: bold;
             background: yellow;
             padding: 2px 4px;
+            border-radius: 3px;
+            display: inline-block;
+            min-width: 40px;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        .delete-album {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 10px;
+            border-radius: 3px;
+        }
+
+        .delete-album:hover {
+            background: #cc0000;
         }
 
         .admin-panel {
@@ -161,6 +184,14 @@
             padding: 4px;
             border: 1px solid #ccc;
             background: white;
+        }
+
+        /* Verbessertes Rating Design für Track-Felder */
+        .track-rating {
+            width: 60px !important;
+            font-family: "Courier New", monospace !important;
+            text-align: center;
+            font-weight: bold;
         }
 
         .modal {
@@ -266,9 +297,23 @@
             margin: 8px 0;
             text-align: center;
         }
+
+        .auto-refresh-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            padding: 4px 8px;
+            font-size: 10px;
+            border-radius: 3px;
+            z-index: 100;
+        }
     </style>
 </head>
 <body>
+    <div class="auto-refresh-status" id="refreshStatus">Auto-Refresh: Aktiv</div>
+
     <div class="header">
         <h1>🎵 DOMES MUSIC LIBRARY 🎵</h1>
         <p><b>Bewertete Alben:</b> <span class="counter" id="albumCount">000</span></p>
@@ -279,8 +324,6 @@
     </div>
 
     <marquee>★ Willkommen in meiner persönlichen Musiksammlung! Öffentlich zugänglich über GitHub Pages! ★</marquee>
-
-
 
     <!-- Admin Panel -->
     <div id="adminPanel" class="admin-panel">
@@ -333,11 +376,11 @@
                         <li>URL wird sein: <b>https://[username].github.io/[repository-name]</b></li>
                     </ol>
 
-                    <h4>3. Dual-Mode Funktionalität:</h4>
+                    <h4>3. Sicherheit:</h4>
                     <p style="font-size: 11px;">
-                        • <b>Öffentlich:</b> Alben werden von der öffentlichen albums.json geladen<br>
-                        • <b>Admin:</b> GitHub Token nur für Bearbeitung/Speichern erforderlich<br>
-                        • <b>Fallback:</b> Wenn GitHub nicht erreichbar, werden lokale Demo-Daten gezeigt
+                        • <b>Passwort:</b> Standard ist "admin123" (SHA-256 gehasht)<br>
+                        • <b>DDoS-Schutz:</b> Max. 3 Login-Versuche, dann 5 Min Sperre<br>
+                        • <b>Token-Schutz:</b> GitHub Token nur lokal gespeichert
                     </p>
                 </div>
             </details>
@@ -456,6 +499,8 @@
         let trackCounter = 0;
         let loginAttempts = 0;
         let lockoutEndTime = 0;
+        let refreshInterval;
+        let loginExpireTimeout;
 
         // Password hash (SHA-256 of "admin123")
         const ADMIN_HASH = "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9";
@@ -501,7 +546,81 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadConfig();
             checkInitialState();
+            startAutoRefresh();
+            restoreLoginState();
         });
+
+        // Auto-refresh functionality
+        function startAutoRefresh() {
+            refreshInterval = setInterval(() => {
+                loadAlbumsPublicly();
+                updateRefreshStatus();
+            }, 5 * 60 * 1000); // 5 minutes
+            
+            updateRefreshStatus();
+        }
+
+        function updateRefreshStatus() {
+            const now = new Date();
+            document.getElementById('refreshStatus').textContent = `Auto-Refresh: ${now.toLocaleTimeString()}`;
+        }
+
+        // Login state persistence
+        function saveLoginState() {
+            if (isLoggedIn) {
+                const loginTime = Date.now();
+                localStorage.setItem('adminLoginTime', loginTime.toString());
+                localStorage.setItem('adminLoggedIn', 'true');
+                
+                // Set timeout to auto-logout after 5 minutes
+                if (loginExpireTimeout) {
+                    clearTimeout(loginExpireTimeout);
+                }
+                loginExpireTimeout = setTimeout(() => {
+                    logout();
+                    alert('Admin-Sitzung abgelaufen. Bitte erneut einloggen.');
+                }, 5 * 60 * 1000);
+            } else {
+                localStorage.removeItem('adminLoginTime');
+                localStorage.removeItem('adminLoggedIn');
+                if (loginExpireTimeout) {
+                    clearTimeout(loginExpireTimeout);
+                }
+            }
+        }
+
+        function restoreLoginState() {
+            const loginTime = localStorage.getItem('adminLoginTime');
+            const wasLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+            
+            if (wasLoggedIn && loginTime) {
+                const timeSinceLogin = Date.now() - parseInt(loginTime);
+                const fiveMinutes = 5 * 60 * 1000;
+                
+                if (timeSinceLogin < fiveMinutes) {
+                    // Still within 5 minute window, restore login
+                    isLoggedIn = true;
+                    document.getElementById('loginLink').textContent = '*** ADMIN LOGOUT ***';
+                    document.getElementById('adminPanel').style.display = 'block';
+                    
+                    // Load current config into setup fields
+                    document.getElementById('githubUsername').value = config.githubUsername || '';
+                    document.getElementById('githubRepo').value = config.githubRepo || '';
+                    document.getElementById('githubToken').value = config.githubToken || '';
+                    
+                    // Set timeout for remaining time
+                    const remainingTime = fiveMinutes - timeSinceLogin;
+                    loginExpireTimeout = setTimeout(() => {
+                        logout();
+                        alert('Admin-Sitzung abgelaufen. Bitte erneut einloggen.');
+                    }, remainingTime);
+                } else {
+                    // Expired, clear storage
+                    localStorage.removeItem('adminLoginTime');
+                    localStorage.removeItem('adminLoggedIn');
+                }
+            }
+        }
 
         // Configuration management
         function loadConfig() {
@@ -548,14 +667,19 @@
                         const response = await fetch(publicUrl);
                         if (response.ok) {
                             const data = await response.text();
-                            albums = JSON.parse(data);
+                            const newAlbums = JSON.parse(data);
                             
+                            // Check if we have new albums
+                            if (albums.length > 0 && newAlbums.length > albums.length) {
+                                document.getElementById('connectionStatus').innerHTML = '<div class="status">🆕 Neue Alben gefunden!</div>';
+                                setTimeout(() => document.getElementById('connectionStatus').innerHTML = '', 3000);
+                            }
+                            
+                            albums = newAlbums;
                             updateAlbumCount();
                             displayAlbums();
                             updateFilters();
                             
-                            document.getElementById('connectionStatus').innerHTML = '<div class="status">✅ Alben öffentlich geladen</div>';
-                            setTimeout(() => document.getElementById('connectionStatus').innerHTML = '', 2000);
                             return;
                         }
                     } catch (error) {
@@ -570,11 +694,15 @@
                 }
 
                 // Last fallback: Show demo data
-                showDemoData();
+                if (albums.length === 0) {
+                    showDemoData();
+                }
                 
             } catch (error) {
                 console.error('Public loading error:', error);
-                showDemoData();
+                if (albums.length === 0) {
+                    showDemoData();
+                }
             }
         }
 
@@ -835,12 +963,15 @@
             document.getElementById('githubUsername').value = config.githubUsername || '';
             document.getElementById('githubRepo').value = config.githubRepo || '';
             document.getElementById('githubToken').value = config.githubToken || '';
+            
+            saveLoginState();
         }
 
         function logout() {
             isLoggedIn = false;
             document.getElementById('loginLink').textContent = '*** ADMIN LOGIN ***';
             document.getElementById('adminPanel').style.display = 'none';
+            saveLoginState();
         }
 
         // MusicBrainz API Search
@@ -910,12 +1041,12 @@
                         <td width="200">Song:</td>
                         <td><input type="text" class="track-title" value="${title}" required></td>
                         <td width="80">Rating:</td>
-                        <td width="60"><input type="number" class="track-rating" min="0" max="10" step="0.5" required></td>
+                        <td width="60"><input type="number" class="track-rating" min="0" max="10" step="0.1" required></td>
                         <td width="60"><button type="button" onclick="this.closest('.track-field').remove()">DEL</button></td>
                     </tr>
                     <tr>
                         <td>Kommentar:</td>
-                        <td colspan="4"><input type="text" class="track-comment"></td>
+                        <td colspan="4"><input type="text" class="track-comment" maxlength="100"></td>
                     </tr>
                 </table>
             `;
@@ -958,7 +1089,7 @@
                     genre: document.getElementById('albumGenre').value,
                     review: document.getElementById('albumReview').value,
                     tracks: tracks,
-                    rating: tracks.length > 0 ? tracks.reduce((sum, track) => sum + track.rating, 0) / tracks.length : 0,
+                    rating: tracks.length > 0 ? Math.round((tracks.reduce((sum, track) => sum + track.rating, 0) / tracks.length) * 10) / 10 : 0,
                     dateAdded: new Date().toISOString()
                 };
 
@@ -990,9 +1121,44 @@
             }
         }
 
-        // Function to generate simple album cover design
-        function generateAlbumCover(album) {
-            return ''; // No covers anymore
+        // Album deletion function
+        async function deleteAlbum(albumId) {
+            if (!isLoggedIn) {
+                alert('Du musst als Admin eingeloggt sein!');
+                return;
+            }
+
+            const album = albums.find(a => a.id === albumId);
+            if (!album) return;
+
+            if (!confirm(`Album "${album.title}" von ${album.artist} wirklich löschen?`)) {
+                return;
+            }
+
+            try {
+                // Remove from array
+                albums = albums.filter(a => a.id !== albumId);
+                
+                // Save to GitHub
+                const success = await saveAlbumsToGitHub();
+                
+                if (success) {
+                    updateAlbumCount();
+                    displayAlbums();
+                    updateFilters();
+                    
+                    document.getElementById('connectionStatus').innerHTML = '<div class="status">✅ Album gelöscht!</div>';
+                    setTimeout(() => document.getElementById('connectionStatus').innerHTML = '', 2000);
+                } else {
+                    // Restore album if save failed
+                    albums.push(album);
+                    alert('Fehler beim Löschen des Albums!');
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                albums.push(album); // Restore album
+                alert('Fehler beim Löschen: ' + error.message);
+            }
         }
         
         function updateAlbumCount() {
@@ -1055,9 +1221,10 @@
 
             container.innerHTML = filteredAlbums.map(album => `
                 <div class="album-row" onclick="openAlbumDetail(${album.id})" style="cursor: pointer;">
+                    ${isLoggedIn ? `<button class="delete-album" onclick="event.stopPropagation(); deleteAlbum(${album.id})">🗑️ DEL</button>` : ''}
                     <div class="album-info">
                         <h3><u>${album.title}</u> - ${album.artist} <span class="rating">${album.rating.toFixed(1)}/10</span></h3>
-                        <p><b>Review:</b> ${album.review}</p>
+                        <p><b>Review:</b> ${album.review.length > 150 ? album.review.substring(0, 150) + '...' : album.review}</p>
                         <p><small>
                             ${album.year ? `Jahr: ${album.year} | ` : ''}
                             ${album.genre ? `Genre: ${album.genre} | ` : ''}
@@ -1126,11 +1293,20 @@
                         <tr>
                             <td>${index + 1}</td>
                             <td><b>${track.title}</b></td>
-                            <td><span class="rating">${track.rating}/10</span></td>
+                            <td><span class="rating">${track.rating.toFixed(1)}/10</span></td>
                             <td>${track.comment || '-'}</td>
                         </tr>
                     `).join('')}
                 </table>
+                
+                ${isLoggedIn ? `
+                <hr>
+                <center>
+                    <button onclick="closeModal(); deleteAlbum(${album.id})" style="background: #ff4444; color: white;">
+                        🗑️ Album löschen
+                    </button>
+                </center>
+                ` : ''}
             `;
 
             document.getElementById('albumModal').style.display = 'block';
