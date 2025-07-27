@@ -276,60 +276,62 @@
     <div class="header">
         <h1>🎵 DOMES MUSIC LIBRARY 🎵</h1>
         <p><b>Bewertete Alben:</b> <span class="counter" id="albumCount">000</span></p>
-        <p><a href="#" onclick="toggleLogin()">*** ADMIN LOGIN ***</a></p>
+        <p>
+            <a href="#" onclick="toggleSetup()" id="setupLink">*** SETUP ***</a> | 
+            <a href="#" onclick="toggleLogin()" id="loginLink">*** ADMIN LOGIN ***</a>
+        </p>
         <div id="connectionStatus"></div>
     </div>
 
     <marquee>★ Willkommen in meiner persönlichen Musiksammlung! Daten werden über GitHub synchronisiert! ★</marquee>
 
-
-
-    <!-- Admin Panel -->
-    <div id="adminPanel" class="admin-panel">
-        <h2>═══ ADMIN BEREICH ═══</h2>
+    <!-- Setup Panel -->
+    <div id="setupPanel" class="setup-panel">
+        <h2>🔧 GITHUB SETUP</h2>
+        <p><b>Erstmalige Einrichtung erforderlich!</b></p>
         
-        <!-- GitHub Setup (nur für Admin sichtbar) -->
-        <div id="setupSection" class="setup-section">
-            <h3>🔧 GitHub Konfiguration:</h3>
+        <div class="setup-section">
+            <h3>Schritt 1: GitHub Token erstellen</h3>
+            <ol style="font-size: 11px; margin: 8px 0;">
+                <li>Gehe zu <b>GitHub.com → Settings → Developer settings</b></li>
+                <li><b>Personal access tokens → Tokens (classic)</b></li>
+                <li>Klick <b>"Generate new token (classic)"</b></li>
+                <li>Name: <b>"Music Library"</b></li>
+                <li>Expiration: <b>"No expiration"</b></li>
+                <li>Scopes: ✅ <b>repo</b> (full control of repositories)</li>
+                <li><b>Token generieren und kopieren!</b></li>
+            </ol>
+        </div>
+
+        <div class="setup-section">
+            <h3>Schritt 2: Konfiguration</h3>
             <table class="form-table">
                 <tr>
                     <td width="120"><b>GitHub Username:</b></td>
-                    <td><input type="text" id="githubUsername" placeholder="dein-github-username"></td>
+                    <td><input type="text" id="setupUsername" placeholder="dein-github-username"></td>
                 </tr>
                 <tr>
                     <td><b>Repository Name:</b></td>
-                    <td><input type="text" id="githubRepo" placeholder="music-library"></td>
+                    <td><input type="text" id="setupRepo" placeholder="music-library"></td>
                 </tr>
                 <tr>
                     <td><b>GitHub Token:</b></td>
-                    <td><input type="password" id="githubToken" placeholder="ghp_..."></td>
+                    <td><input type="password" id="setupToken" placeholder="ghp_..."></td>
                 </tr>
             </table>
             
             <p>
-                <button type="button" onclick="saveGitHubConfig()">💾 Konfiguration speichern</button>
-                <button type="button" onclick="testConnection()">🔧 Verbindung testen</button>
+                <button type="button" onclick="saveSetupConfig()">💾 Setup abschließen</button>
+                <button type="button" onclick="testSetupConnection()">🔧 Verbindung testen</button>
             </p>
-            
-            <details>
-                <summary><b>❓ Wie erstelle ich ein GitHub Token?</b></summary>
-                <div style="background: white; padding: 8px; border: 1px solid #ccc; margin: 4px 0;">
-                    <ol style="font-size: 11px; margin: 8px 0;">
-                        <li>Gehe zu <b>GitHub.com → Settings → Developer settings</b></li>
-                        <li><b>Personal access tokens → Tokens (classic)</b></li>
-                        <li>Klick <b>"Generate new token (classic)"</b></li>
-                        <li>Name: <b>"Music Library"</b></li>
-                        <li>Expiration: <b>"No expiration"</b></li>
-                        <li>Scopes: ✅ <b>repo</b> (full control of repositories)</li>
-                        <li><b>Token generieren und kopieren!</b></li>
-                    </ol>
-                </div>
-            </details>
-            
-            <div id="setupStatus"></div>
-            
-            <hr>
         </div>
+        
+        <div id="setupStatus"></div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="admin-panel">
+        <h2>═══ ADMIN BEREICH ═══</h2>
         
         <h3>MusicBrainz Suche:</h3>
         <table class="form-table">
@@ -412,7 +414,7 @@
     <div id="albumsList">
         <center>
             <div class="loading">
-                <h2>Lade Alben von GitHub...</h2>
+                <h2>Loading...</h2>
             </div>
         </center>
     </div>
@@ -446,25 +448,67 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             loadConfig();
-            if (isConfigured()) {
-                loadAlbumsFromGitHub();
-            } else {
-                showSetupMessage();
-            }
+            checkInitialState();
         });
 
         // Configuration management
         function loadConfig() {
             const saved = localStorage.getItem('githubConfig');
             if (saved) {
-                config = JSON.parse(saved);
+                try {
+                    config = JSON.parse(saved);
+                } catch (e) {
+                    console.error('Invalid config in localStorage:', e);
+                    localStorage.removeItem('githubConfig');
+                }
             }
         }
 
-        function saveGitHubConfig() {
-            const username = document.getElementById('githubUsername').value.trim();
-            const repo = document.getElementById('githubRepo').value.trim();
-            const token = document.getElementById('githubToken').value.trim();
+        function checkInitialState() {
+            if (isConfigured()) {
+                // Configuration exists, hide setup and load albums
+                document.getElementById('setupLink').style.display = 'none';
+                loadAlbumsFromGitHub();
+            } else {
+                // No configuration, show setup message
+                showSetupRequired();
+            }
+        }
+
+        function showSetupRequired() {
+            document.getElementById('albumsList').innerHTML = `
+                <center>
+                    <div class="error">
+                        <h2>GitHub Setup erforderlich!</h2>
+                        <p>Klicke auf <b>"*** SETUP ***"</b> um die GitHub-Integration einzurichten.</p>
+                        <p>Du benötigst ein GitHub Repository und einen Personal Access Token.</p>
+                    </div>
+                </center>
+            `;
+        }
+
+        function isConfigured() {
+            return config.githubUsername && config.githubRepo && config.githubToken;
+        }
+
+        // Setup functions
+        function toggleSetup() {
+            const panel = document.getElementById('setupPanel');
+            if (panel.style.display === 'block') {
+                panel.style.display = 'none';
+            } else {
+                panel.style.display = 'block';
+                // Load current config if exists
+                document.getElementById('setupUsername').value = config.githubUsername || '';
+                document.getElementById('setupRepo').value = config.githubRepo || '';
+                document.getElementById('setupToken').value = config.githubToken || '';
+            }
+        }
+
+        function saveSetupConfig() {
+            const username = document.getElementById('setupUsername').value.trim();
+            const repo = document.getElementById('setupRepo').value.trim();
+            const token = document.getElementById('setupToken').value.trim();
 
             if (!username || !repo || !token) {
                 document.getElementById('setupStatus').innerHTML = '<div class="error">❌ Bitte alle Felder ausfüllen!</div>';
@@ -485,34 +529,16 @@
             
             document.getElementById('setupStatus').innerHTML = '<div class="status">✅ Konfiguration gespeichert!</div>';
             
-            // Test connection immediately after saving
+            // Hide setup link and test connection
+            document.getElementById('setupLink').style.display = 'none';
+            
             setTimeout(() => {
-                testConnection();
+                testSetupConnection();
             }, 500);
         }
 
-        function showSetup() {
-            // This function is no longer needed since setup is now in admin panel
-        }
-
-        function showSetupMessage() {
-            document.getElementById('albumsList').innerHTML = `
-                <center>
-                    <div class="error">
-                        <h2>Noch keine Alben vorhanden!</h2>
-                        <p>Logge dich als Admin ein, um die GitHub-Konfiguration einzurichten und Alben hinzuzufügen.</p>
-                    </div>
-                </center>
-            `;
-        }
-
-        function isConfigured() {
-            return config.githubUsername && config.githubRepo && config.githubToken;
-        }
-
-        // GitHub API functions
-        async function testConnection() {
-            if (!config.githubUsername || !config.githubRepo || !config.githubToken) {
+        async function testSetupConnection() {
+            if (!isConfigured()) {
                 document.getElementById('setupStatus').innerHTML = '<div class="error">❌ Bitte zuerst Konfiguration speichern!</div>';
                 return;
             }
@@ -530,8 +556,9 @@
                 if (response.ok) {
                     document.getElementById('setupStatus').innerHTML = '<div class="status">✅ GitHub-Verbindung erfolgreich! Repository gefunden.</div>';
                     
-                    // Initialize repository after successful connection
-                    initializeRepository();
+                    // Initialize repository and hide setup panel
+                    await initializeRepository();
+                    document.getElementById('setupPanel').style.display = 'none';
                 } else if (response.status === 404) {
                     document.getElementById('setupStatus').innerHTML = '<div class="error">❌ Repository nicht gefunden! Prüfe Username und Repository-Name.</div>';
                 } else if (response.status === 401) {
@@ -545,6 +572,7 @@
             }
         }
 
+        // GitHub API functions
         async function initializeRepository() {
             try {
                 // Check if albums.json exists
@@ -558,6 +586,7 @@
                 if (!response.ok) {
                     // Create initial albums.json
                     await createAlbumsFile([]);
+                    document.getElementById('connectionStatus').innerHTML = '<div class="status">✅ Repository initialisiert!</div>';
                 }
                 
                 loadAlbumsFromGitHub();
@@ -685,18 +714,13 @@
 
         function login() {
             isLoggedIn = true;
-            document.querySelector('a[onclick="toggleLogin()"]').textContent = '*** ADMIN LOGOUT ***';
+            document.getElementById('loginLink').textContent = '*** ADMIN LOGOUT ***';
             document.getElementById('adminPanel').style.display = 'block';
-            
-            // Load current config into setup fields
-            document.getElementById('githubUsername').value = config.githubUsername || '';
-            document.getElementById('githubRepo').value = config.githubRepo || '';
-            document.getElementById('githubToken').value = config.githubToken || '';
         }
 
         function logout() {
             isLoggedIn = false;
-            document.querySelector('a[onclick="toggleLogin()"]').textContent = '*** ADMIN LOGIN ***';
+            document.getElementById('loginLink').textContent = '*** ADMIN LOGIN ***';
             document.getElementById('adminPanel').style.display = 'none';
         }
 
@@ -782,6 +806,11 @@
         // Album management
         async function addAlbum(event) {
             event.preventDefault();
+            
+            if (!isConfigured()) {
+                alert('GitHub Setup ist erforderlich!');
+                return;
+            }
             
             const saveButton = document.getElementById('saveButton');
             const statusDiv = document.getElementById('saveStatus');
