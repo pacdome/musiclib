@@ -1,1 +1,74 @@
-[]
+[[
+  {
+    "id": 1704067200000,
+    "title": "Dog Man Star",
+    "artist": "Suede",
+    "year": 1994,
+    "genre": "Britpop, Altrock",
+    "review": "Stimme ist sehr prägnant aber nicht nervig, gibt aber jedem Song einen ähnlichen Vibe - aber das ist halt Suede. Auch wenn kein Song dabei war, der mich komplett vom Hocker gehauen hat, war das Album ein sehr schönes Gesamtwerk. Sehr anders als die Hits von Suede, aber trotzdem gut zu hören. Hatte sehr den Vibe von einem Theater. Als Album cool, die Songs an sich nicht so alltagstauglich immer.",
+    "tracks": [
+      {
+        "title": "Introducing the Band",
+        "rating": 7.5,
+        "comment": "Wertung im Maßstab eines Intros"
+      },
+      {
+        "title": "We Are the Pigs",
+        "rating": 7,
+        "comment": "i. Ansonsten nicht so spannend."
+      },
+      {
+        "title": "Heroine",
+        "rating": 7,
+        "comment": "Nur wie eine erzählte Geschichte."
+      },
+      {
+        "title": "The Wild Ones",
+        "rating": 7.5,
+        "comment": "t bis jetzt. Cooles, langes Outro"
+      },
+      {
+        "title": "Daddy's Speeding",
+        "rating": 6,
+        "comment": "irgendwie wie ein Theaterstück"
+      },
+      {
+        "title": "The Power",
+        "rating": 6.5,
+        "comment": "äh nichts vom Hocker hauendes"
+      },
+      {
+        "title": "New Generation",
+        "rating": 7.5,
+        "comment": "h der beste. Sehr starkes Outro."
+      },
+      {
+        "title": "This Hollywood Life",
+        "rating": 6.5,
+        "comment": "sehr stark. Vocals eher nicht so."
+      },
+      {
+        "title": "The 2 of Us",
+        "rating": 6,
+        "comment": "de höre aber kann man machen."
+      },
+      {
+        "title": "Black or Blue",
+        "rating": 4.5,
+        "comment": "ist jetzt nicht schlecht aber naja."
+      },
+      {
+        "title": "The Asphalt World",
+        "rating": 8,
+        "comment": "t mega special aber schon stark."
+      },
+      {
+        "title": "Still Life",
+        "rating": 6.5,
+        "comment": "über vIII ein bisschen zu drüber."
+      }
+    ],
+    "rating": 6.75,
+    "dateAdded": "2024-01-01T12:00:00Z"
+  }
+]]
