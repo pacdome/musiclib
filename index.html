@@ -5,330 +5,333 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Domes Music Library</title>
     <style>
-        body {
-            font-family: Times, serif;
-            font-size: 12px;
-            background: white;
-            color: black;
-            margin: 8px;
-            line-height: 1.2;
-        }
+    body {
+    font-family: Times, serif;
+    font-size: 12px;
+    background: white;
+    color: black;
+    margin: 8px;
+    line-height: 1.2;
+}
 
-        h1 {
-            font-size: 18px;
-            margin: 0 0 8px 0;
-            text-align: center;
-        }
+h1 {
+    font-size: 18px;
+    margin: 0 0 8px 0;
+    text-align: center;
+}
 
-        h2 {
-            font-size: 14px;
-            margin: 12px 0 6px 0;
-        }
+h2 {
+    font-size: 14px;
+    margin: 12px 0 6px 0;
+}
 
-        h3 {
-            font-size: 12px;
-            margin: 8px 0 4px 0;
-        }
+h3 {
+    font-size: 12px;
+    margin: 8px 0 4px 0;
+}
 
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            border: 1px solid black;
-        }
+table {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid black;
+}
 
-        th, td {
+th, td {
     border: 1px solid black;
     padding: 4px;
     text-align: left;
     vertical-align: top;
-    height: auto;
+}
+
+th {
+    background: #cccccc;
+    font-weight: bold;
+}
+
+tr:nth-child(even) {
+    background: #f0f0f0;
+}
+
+.header {
+    text-align: center;
+    border: 2px solid black;
+    padding: 8px;
+    margin-bottom: 16px;
+    background: #eeeeee;
+}
+
+.nav {
+    text-align: center;
+    margin: 8px 0;
+}
+
+.nav a {
+    color: blue;
+    text-decoration: underline;
+    margin: 0 8px;
+}
+
+.nav a:visited {
+    color: purple;
+}
+
+input, select, textarea {
+    font-family: Times, serif;
+    font-size: 12px;
+    border: 1px solid black;
+    padding: 2px;
+}
+
+input[type="submit"], button {
+    background: #dddddd;
+    border: 2px outset #dddddd;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-family: Times, serif;
+    font-size: 12px;
+}
+
+input[type="submit"]:active, button:active {
+    border: 2px inset #dddddd;
+}
+
+input[type="submit"]:disabled, button:disabled {
+    background: #aaaaaa;
+    cursor: not-allowed;
+}
+
+.album-row {
+    border-bottom: 1px solid black;
+    padding: 8px 0;
+    margin: 8px 0;
+    position: relative;
+}
+
+.album-info {
+    margin: 0;
+}
+
+.rating {
+    font-weight: bold;
+    background: yellow;
+    padding: 2px 4px;
+    border-radius: 3px;
+    display: inline-block;
+    min-width: 40px;
+    text-align: center;
+    font-size: 11px;
+}
+
+.delete-album {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 10px;
+    border-radius: 3px;
+}
+
+.delete-album:hover {
+    background: #cc0000;
+}
+
+.admin-panel {
+    display: none;
+    border: 2px solid black;
+    padding: 12px;
+    margin: 16px 0;
+    background: #f8f8f8;
+}
+
+.setup-panel {
+    display: none;
+    border: 2px solid red;
+    padding: 12px;
+    margin: 16px 0;
+    background: #ffe0e0;
+}
+
+.setup-section {
+    border: 1px solid #666;
+    padding: 8px;
+    margin: 8px 0;
+    background: #f8f8f8;
+}
+
+.form-table {
+    width: 100%;
+}
+
+.form-table td {
+    padding: 4px;
+    border: none;
+}
+
+.form-table input, .form-table select, .form-table textarea {
+    width: 100%;
+}
+
+.track-list {
+    margin: 8px 0;
+}
+
+.track-item {
+    margin: 4px 0;
+    padding: 4px;
+    border: 1px solid #ccc;
+    background: white;
+}
+
+/* Verbessertes Rating Design für Track-Felder */
+.track-rating {
+    width: 60px !important;
+    font-family: "Courier New", monospace !important;
+    text-align: center;
+    font-weight: bold;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 16px;
+    border: 2px solid black;
+    width: 90%;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* Verbesserte Modal-Tabelle für Songs */
+.songs-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.songs-table th:nth-child(1) { width: 40px; } /* Nr. */
+.songs-table th:nth-child(2) { width: 40%; }  /* Titel */
+.songs-table th:nth-child(3) { width: 80px; } /* Rating */
+.songs-table th:nth-child(4) { width: auto; }  /* Kommentar */
+
+.songs-table td {
     word-wrap: break-word;
-}
-        
-
-
-        th {
-            background: #cccccc;
-            font-weight: bold;
-        }
-
-        tr:nth-child(even) {
-            background: #f0f0f0;
-        }
-
-        .header {
-            text-align: center;
-            border: 2px solid black;
-            padding: 8px;
-            margin-bottom: 16px;
-            background: #eeeeee;
-        }
-
-        .nav {
-            text-align: center;
-            margin: 8px 0;
-        }
-
-        .nav a {
-            color: blue;
-            text-decoration: underline;
-            margin: 0 8px;
-        }
-
-        .nav a:visited {
-            color: purple;
-        }
-
-        input, select, textarea {
-            font-family: Times, serif;
-            font-size: 12px;
-            border: 1px solid black;
-            padding: 2px;
-        }
-
-        input[type="submit"], button {
-            background: #dddddd;
-            border: 2px outset #dddddd;
-            padding: 4px 8px;
-            cursor: pointer;
-            font-family: Times, serif;
-            font-size: 12px;
-        }
-
-        input[type="submit"]:active, button:active {
-            border: 2px inset #dddddd;
-        }
-
-        input[type="submit"]:disabled, button:disabled {
-            background: #aaaaaa;
-            cursor: not-allowed;
-        }
-
-        .album-row {
-            border-bottom: 1px solid black;
-            padding: 8px 0;
-            margin: 8px 0;
-            position: relative;
-        }
-
-        .album-info {
-            margin: 0;
-        }
-
-        .rating {
-            font-weight: bold;
-            background: yellow;
-            padding: 2px 4px;
-            border-radius: 3px;
-            display: inline-block;
-            min-width: 40px;
-            text-align: center;
-            font-size: 11px;
-        }
-
-        .delete-album {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: #ff4444;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            cursor: pointer;
-            font-size: 10px;
-            border-radius: 3px;
-        }
-
-        .delete-album:hover {
-            background: #cc0000;
-        }
-
-        .admin-panel {
-            display: none;
-            border: 2px solid black;
-            padding: 12px;
-            margin: 16px 0;
-            background: #f8f8f8;
-        }
-
-        .setup-panel {
-            display: none;
-            border: 2px solid red;
-            padding: 12px;
-            margin: 16px 0;
-            background: #ffe0e0;
-        }
-
-        .setup-section {
-            border: 1px solid #666;
-            padding: 8px;
-            margin: 8px 0;
-            background: #f8f8f8;
-        }
-
-        .form-table {
-            width: 100%;
-        }
-
-        .form-table td {
-            padding: 4px;
-            border: none;
-        }
-
-        .form-table input, .form-table select, .form-table textarea {
-            width: 100%;
-        }
-
-        .track-list {
-            margin: 8px 0;
-        }
-
-        .track-item {
-            margin: 4px 0;
-            padding: 4px;
-            border: 1px solid #ccc;
-            background: white;
-        }
-
-        /* Verbessertes Rating Design für Track-Felder */
-        .track-rating {
-            width: 60px !important;
-            font-family: "Courier New", monospace !important;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 16px;
-            border: 2px solid black;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .close {
-            color: black;
-            float: right;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            background: #dddddd;
-            border: 1px solid black;
-            padding: 2px 6px;
-        }
-
-        .filter-section {
-            border: 1px solid black;
-            padding: 8px;
-            margin: 8px 0;
-            background: #f0f0f0;
-        }
-
-        .blink {
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
-        }
-
-        center {
-            text-align: center;
-        }
-
-        hr {
-            border: none;
-            border-top: 1px solid black;
-            margin: 8px 0;
-        }
-
-        marquee {
-            background: yellow;
-            border: 1px solid black;
-            padding: 4px;
-            margin: 8px 0;
-        }
-
-        .counter {
-            font-family: "Courier New", monospace;
-            background: black;
-            color: lime;
-            padding: 2px 4px;
-            border: 1px solid black;
-        }
-
-        .status {
-            background: #e0ffe0;
-            border: 1px solid green;
-            padding: 4px;
-            margin: 4px 0;
-        }
-
-        .error {
-            background: #ffe0e0;
-            border: 1px solid red;
-            padding: 4px;
-            margin: 4px 0;
-            color: red;
-        }
-
-        .loading {
-            background: #ffffcc;
-            border: 1px solid orange;
-            padding: 4px;
-            margin: 4px 0;
-        }
-
-        .public-notice {
-            background: #e6f3ff;
-            border: 2px solid #0066cc;
-            padding: 8px;
-            margin: 8px 0;
-            text-align: center;
-        }
-
-        .auto-refresh-status {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: #f0f0f0;
-            border: 1px solid #ccc;
-            padding: 4px 8px;
-            font-size: 10px;
-            border-radius: 3px;
-            z-index: 100;
-        }
-        #albumModal table {
-    table-layout: auto !important;
+    vertical-align: top;
+    height: auto;
+    white-space: normal;
 }
 
-#albumModal table td {
-    height: auto !important;
-    white-space: normal !important;
-    word-wrap: break-word !important;
-    vertical-align: top !important;
-    padding: 8px !important;
-    line-height: 1.4 !important;
+.songs-table .comment-cell {
+    min-height: 20px;
+    padding: 6px 4px;
+    line-height: 1.3;
 }
 
-#albumModal table td:last-child {
-    max-width: 250px;
-    min-width: 150px;
+.close {
+    color: black;
+    float: right;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    background: #dddddd;
+    border: 1px solid black;
+    padding: 2px 6px;
+}
+
+.filter-section {
+    border: 1px solid black;
+    padding: 8px;
+    margin: 8px 0;
+    background: #f0f0f0;
+}
+
+.blink {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+center {
+    text-align: center;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid black;
+    margin: 8px 0;
+}
+
+marquee {
+    background: yellow;
+    border: 1px solid black;
+    padding: 4px;
+    margin: 8px 0;
+}
+
+.counter {
+    font-family: "Courier New", monospace;
+    background: black;
+    color: lime;
+    padding: 2px 4px;
+    border: 1px solid black;
+}
+
+.status {
+    background: #e0ffe0;
+    border: 1px solid green;
+    padding: 4px;
+    margin: 4px 0;
+}
+
+.error {
+    background: #ffe0e0;
+    border: 1px solid red;
+    padding: 4px;
+    margin: 4px 0;
+    color: red;
+}
+
+.loading {
+    background: #ffffcc;
+    border: 1px solid orange;
+    padding: 4px;
+    margin: 4px 0;
+}
+
+.public-notice {
+    background: #e6f3ff;
+    border: 2px solid #0066cc;
+    padding: 8px;
+    margin: 8px 0;
+    text-align: center;
+}
+
+.auto-refresh-status {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 4px 8px;
+    font-size: 10px;
+    border-radius: 3px;
+    z-index: 100;
 }
     </style>
 </head>
@@ -1303,19 +1306,22 @@
                 <hr>
                 
                 <h3>═══ SONGS (${album.tracks.length}) ═══</h3>
-                <table width="100%">
-                    <tr>
-                        <th>Nr.</th>
-                        <th>Titel</th>
-                        <th>Rating</th>
-                        <th>Kommentar</th>
-                    </tr>
+                <table class="songs-table" width="100%">
+    <thead>
+        <tr>
+            <th>Nr.</th>
+            <th>Titel</th>
+            <th>Rating</th>
+            <th>Kommentar</th>
+        </tr>
+    </thead>
+    <tbody>
                     ${album.tracks.map((track, index) => `
                         <tr>
                             <td>${index + 1}</td>
                             <td><b>${track.title}</b></td>
                             <td><span class="rating">${track.rating.toFixed(1)}/10</span></td>
-                            <td>${track.comment || '-'}</td>
+                            <td class="comment-cell">${track.comment || '-'}</td>
                         </tr>
                     `).join('')}
                 </table>
