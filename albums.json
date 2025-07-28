@@ -5,70 +5,71 @@
     "artist": "Suede",
     "year": 1994,
     "genre": "Britpop, Altrock",
-    "review": "Stimme ist sehr prägnant aber nicht nervig, gibt aber jedem Song einen ähnlichen Vibe - aber das ist halt Suede. Auch wenn kein Song dabei war, der mich komplett vom Hocker gehauen hat, war das Album ein sehr schönes Gesamtwerk. Sehr anders als die Hits von Suede, aber trotzdem gut zu hören. Hatte sehr den Vibe von einem Theater. Als Album cool, die Songs an sich nicht so alltagstauglich immer.",
+    "review": "Stimme ist sehr pr�gnant aber nicht nervig, gibt aber jedem Song einen �hnlichen Vibe - aber das ist halt Suede. Auch wenn kein Song dabei war, der mich komplett vom Hocker gehauen hat, war das Album ein sehr sch�nes Gesamtwerk. Sehr anders als die Hits von Suede, aber trotzdem gut zu h�ren. Hatte sehr den Vibe von einem Theater. Als Album cool, die Songs an sich nicht so alltagstauglich immer.",
     "tracks": [
       {
         "title": "Introducing the Band",
         "rating": 7.5,
-        "comment": "Wertung im Maßstab eines Intros"
+        "comment": ""
       },
       {
         "title": "We Are the Pigs",
         "rating": 7,
-        "comment": "i. Ansonsten nicht so spannend."
+        "comment": ""
       },
       {
         "title": "Heroine",
         "rating": 7,
-        "comment": "Nur wie eine erzählte Geschichte."
+        "comment": ""
       },
       {
         "title": "The Wild Ones",
         "rating": 7.5,
-        "comment": "t bis jetzt. Cooles, langes Outro"
+        "comment": ""
       },
       {
         "title": "Daddy's Speeding",
         "rating": 6,
-        "comment": "irgendwie wie ein Theaterstück"
+        "comment": ""
       },
       {
         "title": "The Power",
         "rating": 6.5,
-        "comment": "äh nichts vom Hocker hauendes"
+        "comment": ""
       },
       {
         "title": "New Generation",
         "rating": 7.5,
-        "comment": "h der beste. Sehr starkes Outro."
+        "comment": ""
       },
       {
         "title": "This Hollywood Life",
         "rating": 6.5,
-        "comment": "sehr stark. Vocals eher nicht so."
+        "comment": ""
       },
       {
         "title": "The 2 of Us",
         "rating": 6,
-        "comment": "de höre aber kann man machen."
+        "comment": ""
       },
       {
         "title": "Black or Blue",
         "rating": 4.5,
-        "comment": "ist jetzt nicht schlecht aber naja."
+        "comment": ""
       },
       {
         "title": "The Asphalt World",
         "rating": 8,
-        "comment": "t mega special aber schon stark."
+        "comment": ""
       },
       {
         "title": "Still Life",
         "rating": 6.5,
-        "comment": "über vIII ein bisschen zu drüber."
+        "comment": ""
       }
     ],
-    "rating": 6.75,
-    "dateAdded": "2024-01-01T12:00:00Z"
+    "rating": 6.7,
+    "dateAdded": "2024-01-01T12:00:00Z",
+    "lastModified": "2025-07-28T12:17:33.165Z"
   }
 ]
