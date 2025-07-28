@@ -217,42 +217,27 @@
         }
 
         /* Verbesserte Modal-Tabelle für Songs */
-        .modal-content .songs-table {
+        .songs-table {
             width: 100%;
             table-layout: fixed;
-            border-collapse: collapse;
         }
 
-        .modal-content .songs-table th:nth-child(1) { width: 30px; }   /* Nr. */
-        .modal-content .songs-table th:nth-child(2) { width: 35%; }    /* Titel */
-        .modal-content .songs-table th:nth-child(3) { width: 70px; }   /* Rating */
-        .modal-content .songs-table th:nth-child(4) { width: auto; }   /* Kommentar */
+        .songs-table th:nth-child(1) { width: 40px; }  /* Nr. */
+        .songs-table th:nth-child(2) { width: 40%; }   /* Titel */
+        .songs-table th:nth-child(3) { width: 80px; }  /* Rating */
+        .songs-table th:nth-child(4) { width: auto; }  /* Kommentar */
 
-        .modal-content .songs-table td {
+        .songs-table td {
             word-wrap: break-word;
-            padding: 8px 4px;
+            padding: 6px 4px;
             vertical-align: top;
-            border: 1px solid black;
         }
 
-        .modal-content .songs-table th {
-            padding: 8px 4px;
-            vertical-align: top;
-            border: 1px solid black;
-            background: #cccccc;
-            font-weight: bold;
-        }
-
-        .modal-content .songs-table td:nth-child(4) {
+        .songs-table td:nth-child(4) {
             /* Kommentar-Spalte: Mehrzeilig, bessere Lesbarkeit */
-            white-space: normal;
-            word-wrap: break-word;
-            line-height: 1.4;
-            min-height: 20px;
-        }
-
-        .modal-content .songs-table tr:nth-child(even) {
-            background: #f0f0f0;
+            white-space: pre-wrap;
+            line-height: 1.3;
+            max-width: 200px;
         }
 
         .close {
@@ -516,6 +501,52 @@
         <div class="modal-content">
             <span class="close" onclick="closeModal()">✖</span>
             <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- Album Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditModal()">✖</span>
+            <div id="editModalContent">
+                <center><h2>═══ ALBUM BEARBEITEN ═══</h2></center>
+                
+                <form onsubmit="updateAlbum(event)" id="editForm">
+                    <input type="hidden" id="editAlbumId">
+                    
+                    <table class="form-table">
+                        <tr>
+                            <td width="80"><b>Album:</b></td>
+                            <td><input type="text" id="editAlbumTitle" required></td>
+                            <td width="80"><b>Künstler:</b></td>
+                            <td><input type="text" id="editAlbumArtist" required></td>
+                        </tr>
+                        <tr>
+                            <td><b>Jahr:</b></td>
+                            <td><input type="number" id="editAlbumYear" min="1900" max="2025"></td>
+                            <td><b>Genre:</b></td>
+                            <td><input type="text" id="editAlbumGenre"></td>
+                        </tr>
+                        <tr>
+                            <td><b>Review:</b></td>
+                            <td colspan="3"><textarea id="editAlbumReview" rows="3" required></textarea></td>
+                        </tr>
+                    </table>
+
+                    <div id="editTracksContainer">
+                        <h3>Songs:</h3>
+                        <button type="button" onclick="addEditTrackField()">+ Song hinzufügen</button>
+                    </div>
+
+                    <hr>
+                    <center>
+                        <input type="submit" value="💾 ÄNDERUNGEN SPEICHERN" id="updateButton">
+                        <button type="button" onclick="closeEditModal()" style="margin-left: 10px;">❌ Abbrechen</button>
+                    </center>
+                </form>
+                
+                <div id="editStatus"></div>
+            </div>
         </div>
     </div>
 
@@ -1341,6 +1372,9 @@
                 ${isLoggedIn ? `
                 <hr>
                 <center>
+                    <button onclick="openEditModal(${album.id})" style="background: #4CAF50; color: white; margin-right: 10px;">
+                        ✏️ Album bearbeiten
+                    </button>
                     <button onclick="closeModal(); deleteAlbum(${album.id})" style="background: #ff4444; color: white;">
                         🗑️ Album löschen
                     </button>
@@ -1355,11 +1389,144 @@
             document.getElementById('albumModal').style.display = 'none';
         }
 
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        // Edit Album Functions
+        function openEditModal(albumId) {
+            const album = albums.find(a => a.id === albumId);
+            if (!album) return;
+
+            // Fill form with current album data
+            document.getElementById('editAlbumId').value = album.id;
+            document.getElementById('editAlbumTitle').value = album.title;
+            document.getElementById('editAlbumArtist').value = album.artist;
+            document.getElementById('editAlbumYear').value = album.year || '';
+            document.getElementById('editAlbumGenre').value = album.genre || '';
+            document.getElementById('editAlbumReview').value = album.review;
+
+            // Clear existing tracks
+            const container = document.getElementById('editTracksContainer');
+            const existingTracks = container.querySelectorAll('.edit-track-field');
+            existingTracks.forEach(track => track.remove());
+
+            // Add current tracks
+            album.tracks.forEach(track => {
+                addEditTrackField(track.title, track.rating, track.comment);
+            });
+
+            // Close detail modal and open edit modal
+            closeModal();
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        function addEditTrackField(title = '', rating = '', comment = '') {
+            const container = document.getElementById('editTracksContainer');
+            const trackDiv = document.createElement('div');
+            trackDiv.className = 'edit-track-field track-item';
+            trackDiv.innerHTML = `
+                <table width="100%">
+                    <tr>
+                        <td width="200">Song:</td>
+                        <td><input type="text" class="edit-track-title" value="${title}" required></td>
+                        <td width="80">Rating:</td>
+                        <td width="60"><input type="number" class="edit-track-rating" min="0" max="10" step="0.1" value="${rating}" required></td>
+                        <td width="60"><button type="button" onclick="this.closest('.edit-track-field').remove()">DEL</button></td>
+                    </tr>
+                    <tr>
+                        <td>Kommentar:</td>
+                        <td colspan="4"><input type="text" class="edit-track-comment" maxlength="100" value="${comment}"></td>
+                    </tr>
+                </table>
+            `;
+            container.appendChild(trackDiv);
+        }
+
+        async function updateAlbum(event) {
+            event.preventDefault();
+            
+            if (!isConfigured()) {
+                alert('GitHub Setup ist erforderlich zum Speichern!');
+                return;
+            }
+            
+            const updateButton = document.getElementById('updateButton');
+            const statusDiv = document.getElementById('editStatus');
+            
+            updateButton.disabled = true;
+            updateButton.value = 'SPEICHERE...';
+            statusDiv.innerHTML = '<div class="loading">Speichere Änderungen auf GitHub...</div>';
+            
+            try {
+                const albumId = parseInt(document.getElementById('editAlbumId').value);
+                const albumIndex = albums.findIndex(a => a.id === albumId);
+                
+                if (albumIndex === -1) {
+                    throw new Error('Album nicht gefunden!');
+                }
+
+                const tracks = [];
+                const trackFields = document.querySelectorAll('.edit-track-field');
+                
+                trackFields.forEach(field => {
+                    const title = field.querySelector('.edit-track-title').value;
+                    const rating = parseFloat(field.querySelector('.edit-track-rating').value);
+                    const comment = field.querySelector('.edit-track-comment').value;
+                    
+                    tracks.push({ title, rating, comment });
+                });
+
+                // Update album data
+                const updatedAlbum = {
+                    ...albums[albumIndex], // Keep original id and dateAdded
+                    title: document.getElementById('editAlbumTitle').value,
+                    artist: document.getElementById('editAlbumArtist').value,
+                    year: parseInt(document.getElementById('editAlbumYear').value) || null,
+                    genre: document.getElementById('editAlbumGenre').value,
+                    review: document.getElementById('editAlbumReview').value,
+                    tracks: tracks,
+                    rating: tracks.length > 0 ? Math.round((tracks.reduce((sum, track) => sum + track.rating, 0) / tracks.length) * 10) / 10 : 0,
+                    lastModified: new Date().toISOString()
+                };
+
+                // Store original album for rollback
+                const originalAlbum = albums[albumIndex];
+                albums[albumIndex] = updatedAlbum;
+                
+                const success = await saveAlbumsToGitHub();
+                
+                if (success) {
+                    updateAlbumCount();
+                    displayAlbums();
+                    updateFilters();
+                    
+                    statusDiv.innerHTML = '<div class="status">✅ Album erfolgreich aktualisiert!</div>';
+                    setTimeout(() => {
+                        closeEditModal();
+                    }, 1500);
+                } else {
+                    albums[albumIndex] = originalAlbum; // Rollback
+                    statusDiv.innerHTML = '<div class="error">❌ Fehler beim Speichern auf GitHub!</div>';
+                }
+            } catch (error) {
+                console.error('Update album error:', error);
+                statusDiv.innerHTML = '<div class="error">❌ Fehler: ' + error.message + '</div>';
+            } finally {
+                updateButton.disabled = false;
+                updateButton.value = '💾 ÄNDERUNGEN SPEICHERN';
+            }
+        }
+
         // Close modal when clicking outside
         window.onclick = function(event) {
             const modal = document.getElementById('albumModal');
+            const editModal = document.getElementById('editModal');
             if (event.target === modal) {
                 closeModal();
+            }
+            if (event.target === editModal) {
+                closeEditModal();
             }
         }
     </script>
