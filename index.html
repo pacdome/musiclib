@@ -217,27 +217,42 @@
         }
 
         /* Verbesserte Modal-Tabelle für Songs */
-        .songs-table {
+        .modal-content .songs-table {
             width: 100%;
             table-layout: fixed;
+            border-collapse: collapse;
         }
 
-        .songs-table th:nth-child(1) { width: 40px; }  /* Nr. */
-        .songs-table th:nth-child(2) { width: 40%; }   /* Titel */
-        .songs-table th:nth-child(3) { width: 80px; }  /* Rating */
-        .songs-table th:nth-child(4) { width: auto; }  /* Kommentar */
+        .modal-content .songs-table th:nth-child(1) { width: 30px; }   /* Nr. */
+        .modal-content .songs-table th:nth-child(2) { width: 35%; }    /* Titel */
+        .modal-content .songs-table th:nth-child(3) { width: 70px; }   /* Rating */
+        .modal-content .songs-table th:nth-child(4) { width: auto; }   /* Kommentar */
 
-        .songs-table td {
+        .modal-content .songs-table td {
             word-wrap: break-word;
-            padding: 6px 4px;
+            padding: 8px 4px;
             vertical-align: top;
+            border: 1px solid black;
         }
 
-        .songs-table td:nth-child(4) {
+        .modal-content .songs-table th {
+            padding: 8px 4px;
+            vertical-align: top;
+            border: 1px solid black;
+            background: #cccccc;
+            font-weight: bold;
+        }
+
+        .modal-content .songs-table td:nth-child(4) {
             /* Kommentar-Spalte: Mehrzeilig, bessere Lesbarkeit */
-            white-space: pre-wrap;
-            line-height: 1.3;
-            max-width: 200px;
+            white-space: normal;
+            word-wrap: break-word;
+            line-height: 1.4;
+            min-height: 20px;
+        }
+
+        .modal-content .songs-table tr:nth-child(even) {
+            background: #f0f0f0;
         }
 
         .close {
